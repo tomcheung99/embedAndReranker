@@ -20,20 +20,23 @@ export class Router {
             json(res, 200, { status: "ok" });
             return;
         }
-        // Access Log
-        console.log(`[${new Date().toISOString()}] ${method} ${url}`);
+        const start = Date.now();
+        const ts = new Date().toISOString();
+        process.stdout.write(`[${ts}] --> ${method} ${url}\n`);
         const route = this.routes.find((r) => r.method === method && r.path === url);
         if (!route) {
+            process.stdout.write(`[${ts}] <-- ${method} ${url} 404 (${Date.now() - start}ms)\n`);
             json(res, 404, { error: "Not Found" });
             return;
         }
         try {
             const body = method === "GET" ? null : await parseBody(req);
             await route.handler(req, res, body);
+            process.stdout.write(`[${new Date().toISOString()}] <-- ${method} ${url} ${res.statusCode} (${Date.now() - start}ms)\n`);
         }
         catch (err) {
             const message = err instanceof Error ? err.message : String(err);
-            console.error(`[${method} ${url}] Error:`, message);
+            process.stderr.write(`[${new Date().toISOString()}] <-- ${method} ${url} 500 (${Date.now() - start}ms) Error: ${message}\n`);
             json(res, 500, { error: message });
         }
     }

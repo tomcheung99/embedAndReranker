@@ -160,7 +160,7 @@ const server = createServer((req, res) => {
     });
 });
 server.listen(serverCfg.port, () => {
-    console.log(`
+    const banner = `
 ╔══════════════════════════════════════════════════════╗
 ║  Embed & Reranker Gateway                            ║
 ║  Port:        ${String(serverCfg.port).padEnd(39)}║
@@ -168,8 +168,10 @@ server.listen(serverCfg.port, () => {
 ║  Retrieve K:  ${String(defaults.retrieveTopK).padEnd(39)}║
 ║  ColBERT K:   ${String(defaults.colbertTopK).padEnd(39)}║
 ║  Rerank K:    ${String(defaults.rerankTopK).padEnd(39)}║
+║  Access Log:  ENABLED                                ║
 ╚══════════════════════════════════════════════════════╝
-  `);
+`;
+    process.stdout.write(banner);
 });
 export { server };
 //# sourceMappingURL=app.js.map
