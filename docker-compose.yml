@@ -6,6 +6,8 @@ services:
     ports:
       - "${PORT:-3999}:3000"
     environment:
+      # ── 伺服器綁定設定 ────────────────────────────────────
+      PORT: 3000
       # ── 服務端點 ─────────────────────────────────────────
       EMBED_URL: "${EMBED_URL:-http://bge-m3:8000}"
       RETRIEVE_URL: "${RETRIEVE_URL:-http://vector-gateway:8100}"
