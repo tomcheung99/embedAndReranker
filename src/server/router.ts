@@ -35,11 +35,14 @@ export class Router {
     const method = req.method ?? "GET";
     const url = req.url ?? "/";
 
-    // 健康檢查
+    // 健康檢查 (不印 log，避免洗版)
     if (url === "/health" && method === "GET") {
       json(res, 200, { status: "ok" });
       return;
     }
+
+    // Access Log
+    console.log(`[${new Date().toISOString()}] ${method} ${url}`);
 
     const route = this.routes.find(
       (r) => r.method === method && r.path === url,
