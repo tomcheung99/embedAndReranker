@@ -35,7 +35,7 @@ export interface TopKOverrides {
 
 export function loadServerConfig(): ServerConfig {
   return {
-    port: intEnv("PORT", 3000),
+    port: intEnv("APP_PORT", 3000),
     concurrency: intEnv("CONCURRENCY", 2),
     embedUrl: strEnv("EMBED_URL", "http://localhost:8000"),
     retrieveUrl: strEnv("RETRIEVE_URL", "http://localhost:8100"),
