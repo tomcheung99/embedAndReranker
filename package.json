@@ -1,0 +1,31 @@
+{
+  "name": "embed-and-reranker",
+  "version": "1.0.0",
+  "description": "BGE-M3 + BGE-Reranker-V2-m3 microservice client — embedding, hybrid retrieval, ColBERT & cross-encoder reranking pipeline",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server/app.js",
+    "dev": "tsc --watch & node --watch dist/server/app.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["bge-m3", "reranker", "embedding", "colbert", "retrieval", "rag"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  }
+}

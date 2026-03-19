@@ -1,0 +1,33 @@
+services:
+  gateway:
+    build: .
+    container_name: embed-reranker-gateway
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # ── 服務端點 ─────────────────────────────────────────
+      EMBED_URL: "${EMBED_URL:-http://bge-m3:8000}"
+      RETRIEVE_URL: "${RETRIEVE_URL:-http://vector-gateway:8100}"
+      COLBERT_URL: "${COLBERT_URL:-http://bge-m3:8000}"
+      RERANK_URL: "${RERANK_URL:-http://bge-reranker:8002}"
+      # ── 佇列與效能 ──────────────────────────────────────
+      CONCURRENCY: "${CONCURRENCY:-2}"
+      TIMEOUT_MS: "${TIMEOUT_MS:-30000}"
+      MAX_RETRIES: "${MAX_RETRIES:-2}"
+      # ── 預設 Top-K（可透過 API runtime 修改） ────────────
+      DEFAULT_RETRIEVE_TOP_K: "${DEFAULT_RETRIEVE_TOP_K:-50}"
+      DEFAULT_COLBERT_TOP_K: "${DEFAULT_COLBERT_TOP_K:-20}"
+      DEFAULT_RERANK_TOP_K: "${DEFAULT_RERANK_TOP_K:-10}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - inference
+
+networks:
+  inference:
+    driver: bridge
