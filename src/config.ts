@@ -5,11 +5,7 @@
 export interface ServiceEndpoints {
   /** Embedding 服務根位址，例如 http://gpu-host:8000 */
   embed: string;
-  /** 混合檢索 / Vector Gateway 端點 */
-  retrieve: string;
-  /** ColBERT 向量重排端點 */
-  colbert: string;
-  /** Cross-Encoder 最終重排端點 */
+  /** Cross-Encoder Reranker 端點 */
   rerank: string;
 }
 

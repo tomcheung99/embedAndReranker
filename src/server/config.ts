@@ -1,5 +1,5 @@
 // ============================================================
-// Server Config — 環境變數 + API 可調參數
+// Server Config — 環境變數
 // ============================================================
 
 export interface ServerConfig {
@@ -7,30 +7,22 @@ export interface ServerConfig {
   port: number;
   /** 任務佇列並發數 */
   concurrency: number;
-  /** 各微服務端點 */
+  /** Embedding 微服務端點 */
   embedUrl: string;
-  retrieveUrl: string;
-  colbertUrl: string;
+  /** Reranker 微服務端點 */
   rerankUrl: string;
   /** HTTP 超時（ms） */
   timeoutMs: number;
   /** 重試次數 */
   maxRetries: number;
-  /** 預設 Top-K 設定（可透過 API 覆寫） */
-  defaults: TopKDefaults;
-}
-
-export interface TopKDefaults {
-  retrieveTopK: number;
-  colbertTopK: number;
-  rerankTopK: number;
-}
-
-/** API 請求中可覆寫的 top_k */
-export interface TopKOverrides {
-  retrieve_top_k?: number;
-  colbert_top_k?: number;
-  rerank_top_k?: number;
+  /** Embedding 批次大小上限（防止 OOM） */
+  maxBatchSize: number;
+  /** Rerank 文件數上限（防止 OOM） */
+  maxDocuments: number;
+  /** 預設 embedding model 名稱（用於 API 回應） */
+  defaultEmbedModel: string;
+  /** 預設 reranker model 名稱（用於 API 回應） */
+  defaultRerankModel: string;
 }
 
 export function loadServerConfig(): ServerConfig {
@@ -38,16 +30,13 @@ export function loadServerConfig(): ServerConfig {
     port: intEnv("APP_PORT", 3000),
     concurrency: intEnv("CONCURRENCY", 2),
     embedUrl: strEnv("EMBED_URL", "http://localhost:8000"),
-    retrieveUrl: strEnv("RETRIEVE_URL", "http://localhost:8100"),
-    colbertUrl: strEnv("COLBERT_URL", "http://localhost:8001"),
     rerankUrl: strEnv("RERANK_URL", "http://localhost:8002"),
     timeoutMs: intEnv("TIMEOUT_MS", 30000),
     maxRetries: intEnv("MAX_RETRIES", 2),
-    defaults: {
-      retrieveTopK: intEnv("DEFAULT_RETRIEVE_TOP_K", 50),
-      colbertTopK: intEnv("DEFAULT_COLBERT_TOP_K", 20),
-      rerankTopK: intEnv("DEFAULT_RERANK_TOP_K", 10),
-    },
+    maxBatchSize: intEnv("MAX_BATCH_SIZE", 64),
+    maxDocuments: intEnv("MAX_DOCUMENTS", 1024),
+    defaultEmbedModel: strEnv("DEFAULT_EMBED_MODEL", "bge-m3"),
+    defaultRerankModel: strEnv("DEFAULT_RERANK_MODEL", "bge-reranker-v2-m3"),
   };
 }
 

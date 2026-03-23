@@ -1,7 +1,7 @@
 {
   "name": "embed-and-reranker",
   "version": "1.0.0",
-  "description": "BGE-M3 + BGE-Reranker-V2-m3 microservice client — embedding, hybrid retrieval, ColBERT & cross-encoder reranking pipeline",
+  "description": "OpenAI-compatible embedding + reranker API gateway for BGE-M3 / BGE-Reranker-V2-m3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
