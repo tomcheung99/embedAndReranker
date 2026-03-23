@@ -95,6 +95,7 @@ router.post("/v1/embeddings", async (_req, res, body) => {
     object: "list",
     data,
     model,
+    // Gateway 不持有 tokenizer，token 計數由後端模型服務負責
     usage: { prompt_tokens: 0, total_tokens: 0 },
   };
 
@@ -159,6 +160,7 @@ router.post("/v1/rerank", async (_req, res, body) => {
   const response: RerankAPIResponse = {
     model,
     results,
+    // Gateway 不持有 tokenizer，token 計數由後端模型服務負責
     usage: { total_tokens: 0 },
   };
 
