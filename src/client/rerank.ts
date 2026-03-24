@@ -1,14 +1,14 @@
 // ============================================================
-// /v1/rerank Client — Cross-Encoder 最終精排
+// /v1/rerank Client — Cross-Encoder 精排
 // ============================================================
 
 import { HttpClient } from "./base.js";
 import type { ClientConfig } from "../config.js";
 import type {
-  RerankRequest,
-  RerankResponse,
-  RerankDocument,
-  RerankResult,
+  RerankBackendRequest,
+  RerankBackendResponse,
+  RerankBackendDocument,
+  RerankBackendResult,
 } from "../types.js";
 
 export class RerankClient {
@@ -20,22 +20,18 @@ export class RerankClient {
     this.url = `${config.endpoints.rerank.replace(/\/+$/, "")}/v1/rerank`;
   }
 
-  /**
-   * Cross-Encoder 精排。
-   * **注意**：此階段計算量最大，只傳入 Top-10 ~ Top-20 候選。
-   */
   async rerank(
     query: string,
-    documents: RerankDocument[],
+    documents: RerankBackendDocument[],
     topK?: number,
-  ): Promise<RerankResult[]> {
-    const payload: RerankRequest = {
+  ): Promise<RerankBackendResult[]> {
+    const payload: RerankBackendRequest = {
       query,
       documents,
       ...(topK !== undefined && { top_k: topK }),
     };
 
-    const res = await this.http.post<RerankRequest, RerankResponse>(
+    const res = await this.http.post<RerankBackendRequest, RerankBackendResponse>(
       this.url,
       payload,
     );
