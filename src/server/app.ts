@@ -15,7 +15,7 @@
 import { createServer } from "node:http";
 import { Router, json } from "./router.js";
 import { loadServerConfig } from "./config.js";
-import { setLogLevel, logDebug } from "../logger.js";
+import { setLogLevel, logDebug, logInfo } from "../logger.js";
 import { TaskQueue } from "../queue/task-queue.js";
 import { EmbedClient } from "../client/embed.js";
 import { RerankClient } from "../client/rerank.js";
@@ -69,7 +69,7 @@ router.post("/v1/embeddings", async (_req, res, body) => {
   const model = b.model ?? serverCfg.defaultEmbedModel;
   const maxBatch = serverCfg.maxBatchSize;
 
-  logDebug(`embeddings request: model=${model}, texts=${texts.length}`);
+  logInfo(`embeddings request: model=${model}, texts=${texts.length}`);
 
   const handle = taskQueue.submit(async () => {
     const allData: OpenAIEmbeddingData[] = [];
@@ -96,7 +96,7 @@ router.post("/v1/embeddings", async (_req, res, body) => {
 
   const data = await handle.promise;
 
-  logDebug(`embeddings response: model=${model}, embeddings=${data.length}`);
+  logInfo(`embeddings response: model=${model}, embeddings=${data.length}`);
 
   const response: OpenAIEmbeddingResponse = {
     object: "list",
@@ -136,7 +136,7 @@ router.post("/v1/rerank", async (_req, res, body) => {
   const returnDocuments = b.return_documents ?? true;
   const model = b.model ?? serverCfg.defaultRerankModel;
 
-  logDebug(`rerank request: model=${model}, query="${b.query.slice(0, 80)}", documents=${docs.length}, top_n=${topN}`);
+  logInfo(`rerank request: model=${model}, query="${b.query.slice(0, 80)}", documents=${docs.length}, top_n=${topN}`);
 
   const handle = taskQueue.submit(async () => {
     const backendDocs: RerankBackendDocument[] = docs.map((text, i) => ({
@@ -166,7 +166,7 @@ router.post("/v1/rerank", async (_req, res, body) => {
 
   const results = await handle.promise;
 
-  logDebug(`rerank response: model=${model}, results=${results.length}, top_score=${results[0]?.relevance_score ?? "N/A"}`);
+  logInfo(`rerank response: model=${model}, results=${results.length}, top_score=${results[0]?.relevance_score ?? "N/A"}`);
 
   const response: RerankAPIResponse = {
     model,
