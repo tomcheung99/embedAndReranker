@@ -60,7 +60,7 @@ export class Router {
       await route.handler(req, res, body);
       logInfo(`<-- ${method} ${url} ${res.statusCode} (${Date.now() - start}ms)`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = fullErrorMessage(err);
       logError(`<-- ${method} ${url} 500 (${Date.now() - start}ms) Error: ${message}`);
       json(res, 500, { error: message });
     }
@@ -105,4 +105,30 @@ function parseBody(req: IncomingMessage): Promise<unknown> {
 
     req.on("error", reject);
   });
+}
+
+/**
+ * 遞迴展開 Error.cause 鏈，回傳完整錯誤訊息
+ * 支援 AggregateError（Node.js fetch ECONNREFUSED 等）
+ * 例如 "fetch failed: connect ECONNREFUSED 127.0.0.1:8000"
+ */
+function fullErrorMessage(err: unknown): string {
+  if (!(err instanceof Error)) return String(err);
+
+  const parts: string[] = [err.message];
+  let current: unknown = err.cause;
+  while (current) {
+    if (current instanceof AggregateError && current.errors.length > 0) {
+      parts.push(current.errors.map((e) => e.message || String(e)).join(", "));
+      break;
+    } else if (current instanceof Error) {
+      const msg = current.message || (current as NodeJS.ErrnoException).code;
+      if (msg) parts.push(msg);
+      current = current.cause;
+    } else {
+      parts.push(String(current));
+      break;
+    }
+  }
+  return parts.join(": ");
 }
