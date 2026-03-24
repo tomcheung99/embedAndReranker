@@ -3,6 +3,7 @@
 // ============================================================
 
 import { resolveConfig, type ClientConfig } from "../config.js";
+import { logDebug } from "../logger.js";
 
 export class HttpClient {
   private readonly timeoutMs: number;
@@ -24,13 +25,16 @@ export class HttpClient {
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       if (attempt > 0) {
         const delay = this.retryBaseMs * 2 ** (attempt - 1);
+        logDebug(`backend retry: url=${url}, attempt=${attempt}/${this.maxRetries}, delay=${delay}ms`);
         await sleep(delay);
       }
 
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+      const start = Date.now();
 
       try {
+        logDebug(`backend request: POST ${url} (attempt ${attempt + 1}/${this.maxRetries + 1})`);
         const res = await fetch(url, {
           method: "POST",
           headers: {
@@ -43,12 +47,14 @@ export class HttpClient {
 
         if (!res.ok) {
           const text = await res.text().catch(() => "");
+          logDebug(`backend error: POST ${url} -> ${res.status} (${Date.now() - start}ms)`);
           throw new ServiceError(
             `HTTP ${res.status} from ${url}: ${text}`,
             res.status,
           );
         }
 
+        logDebug(`backend response: POST ${url} -> ${res.status} (${Date.now() - start}ms)`);
         return (await res.json()) as TRes;
       } catch (err) {
         lastError =

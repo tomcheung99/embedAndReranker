@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { logInfo, logError } from "../logger.js";
 
 type Handler = (
   req: IncomingMessage,
@@ -42,15 +43,14 @@ export class Router {
     }
 
     const start = Date.now();
-    const ts = new Date().toISOString();
-    process.stdout.write(`[${ts}] --> ${method} ${url}\n`);
+    logInfo(`--> ${method} ${url}`);
 
     const route = this.routes.find(
       (r) => r.method === method && r.path === url,
     );
 
     if (!route) {
-      process.stdout.write(`[${ts}] <-- ${method} ${url} 404 (${Date.now() - start}ms)\n`);
+      logInfo(`<-- ${method} ${url} 404 (${Date.now() - start}ms)`);
       json(res, 404, { error: "Not Found" });
       return;
     }
@@ -58,10 +58,10 @@ export class Router {
     try {
       const body = method === "GET" ? null : await parseBody(req);
       await route.handler(req, res, body);
-      process.stdout.write(`[${new Date().toISOString()}] <-- ${method} ${url} ${res.statusCode} (${Date.now() - start}ms)\n`);
+      logInfo(`<-- ${method} ${url} ${res.statusCode} (${Date.now() - start}ms)`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      process.stderr.write(`[${new Date().toISOString()}] <-- ${method} ${url} 500 (${Date.now() - start}ms) Error: ${message}\n`);
+      logError(`<-- ${method} ${url} 500 (${Date.now() - start}ms) Error: ${message}`);
       json(res, 500, { error: message });
     }
   }
