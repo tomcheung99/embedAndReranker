@@ -15,7 +15,7 @@
 import { createServer } from "node:http";
 import { Router, json } from "./router.js";
 import { loadServerConfig } from "./config.js";
-import { setLogLevel, logDebug } from "./logger.js";
+import { setLogLevel, logDebug } from "../logger.js";
 import { TaskQueue } from "../queue/task-queue.js";
 import { EmbedClient } from "../client/embed.js";
 import { RerankClient } from "../client/rerank.js";

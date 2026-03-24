@@ -3,7 +3,7 @@
 // ============================================================
 
 import { resolveConfig, type ClientConfig } from "../config.js";
-import { logDebug } from "../server/logger.js";
+import { logDebug } from "../logger.js";
 
 export class HttpClient {
   private readonly timeoutMs: number;

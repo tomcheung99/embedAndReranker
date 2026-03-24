@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { logInfo, logError } from "./logger.js";
+import { logInfo, logError } from "../logger.js";
 
 type Handler = (
   req: IncomingMessage,

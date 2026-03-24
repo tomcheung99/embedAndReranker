@@ -2,7 +2,7 @@
 // Server Config — 環境變數
 // ============================================================
 
-import type { LogLevel } from "./logger.js";
+import type { LogLevel } from "../logger.js";
 
 export interface ServerConfig {
   /** 監聽埠號 */
