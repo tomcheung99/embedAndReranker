@@ -2,6 +2,8 @@
 // Server Config — 環境變數
 // ============================================================
 
+import type { LogLevel } from "./logger.js";
+
 export interface ServerConfig {
   /** 監聽埠號 */
   port: number;
@@ -23,6 +25,8 @@ export interface ServerConfig {
   defaultEmbedModel: string;
   /** 預設 reranker model 名稱（用於 API 回應） */
   defaultRerankModel: string;
+  /** 日誌等級（debug | info） */
+  logLevel: LogLevel;
 }
 
 export function loadServerConfig(): ServerConfig {
@@ -37,6 +41,7 @@ export function loadServerConfig(): ServerConfig {
     maxDocuments: intEnv("MAX_DOCUMENTS", 1024),
     defaultEmbedModel: strEnv("DEFAULT_EMBED_MODEL", "bge-m3"),
     defaultRerankModel: strEnv("DEFAULT_RERANK_MODEL", "bge-reranker-v2-m3"),
+    logLevel: logLevelEnv("LOG_LEVEL", "info"),
   };
 }
 
@@ -49,4 +54,10 @@ function intEnv(key: string, fallback: number): number {
 
 function strEnv(key: string, fallback: string): string {
   return process.env[key] ?? fallback;
+}
+
+function logLevelEnv(key: string, fallback: LogLevel): LogLevel {
+  const v = process.env[key]?.toLowerCase();
+  if (v === "debug" || v === "info") return v;
+  return fallback;
 }
