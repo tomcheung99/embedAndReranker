@@ -57,8 +57,7 @@ export class HttpClient {
         logDebug(`backend response: POST ${url} -> ${res.status} (${Date.now() - start}ms)`);
         return (await res.json()) as TRes;
       } catch (err) {
-        lastError =
-          err instanceof Error ? err : new Error(String(err));
+        lastError = errorWithCause(err);
 
         // 不重試 4xx 客戶端錯誤（除了 429 Too Many Requests）
         if (
@@ -86,6 +85,36 @@ export class ServiceError extends Error {
     super(message);
     this.name = "ServiceError";
   }
+}
+
+/**
+ * 將 Error.cause 鏈展開，附加到訊息中以便除錯
+ * 例如 "fetch failed" → "fetch failed: connect ECONNREFUSED 127.0.0.1:8000"
+ */
+function errorWithCause(err: unknown): Error {
+  if (!(err instanceof Error)) return new Error(String(err));
+  if (!err.cause) return err;
+
+  const detail = describeCause(err.cause);
+  if (!detail) return err;
+
+  return new Error(`${err.message}: ${detail}`);
+}
+
+/** 從 Error.cause（含 AggregateError）中提取可讀描述 */
+function describeCause(cause: unknown): string {
+  if (!(cause instanceof Error)) return cause ? String(cause) : "";
+
+  // AggregateError（Node.js fetch ECONNREFUSED 等）會把細節放在 .errors 陣列
+  if (cause instanceof AggregateError && cause.errors.length > 0) {
+    return cause.errors.map((e) => e.message || String(e)).join(", ");
+  }
+
+  // 一般 Error：優先用 message，沒有的話用 code
+  if (cause.message) return cause.message;
+  const code = (cause as NodeJS.ErrnoException).code;
+  if (code) return code;
+  return String(cause);
 }
 
 function sleep(ms: number): Promise<void> {
