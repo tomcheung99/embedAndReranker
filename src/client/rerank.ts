@@ -13,7 +13,7 @@ import type {
 interface InfinityRerankRequest {
   query: string;
   documents: string[];
-  model?: string;
+  model: string;
   top_n?: number;
 }
 
@@ -33,19 +33,24 @@ export class RerankClient {
   private readonly http: HttpClient;
   private readonly url: string;
 
-  constructor(config: ClientConfig) {
+  private readonly defaultModel: string;
+
+  constructor(config: ClientConfig, defaultModel = "BAAI/bge-reranker-v2-m3") {
     this.http = new HttpClient(config);
     this.url = `${config.endpoints.rerank.replace(/\/+$/, "")}/rerank`;
+    this.defaultModel = defaultModel;
   }
 
   async rerank(
     query: string,
     documents: RerankBackendDocument[],
     topK?: number,
+    model?: string,
   ): Promise<RerankBackendResult[]> {
     const payload: InfinityRerankRequest = {
       query,
       documents: documents.map((d) => d.content),
+      model: model ?? this.defaultModel,
       ...(topK !== undefined && { top_n: topK }),
     };
 

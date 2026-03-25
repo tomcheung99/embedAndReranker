@@ -44,8 +44,8 @@ const clientCfg: ClientConfig = {
   maxRetries: serverCfg.maxRetries,
 };
 
-const embedClient = new EmbedClient(clientCfg);
-const rerankClient = new RerankClient(clientCfg);
+const embedClient = new EmbedClient(clientCfg, serverCfg.defaultEmbedModel);
+const rerankClient = new RerankClient(clientCfg, serverCfg.defaultRerankModel);
 const taskQueue = new TaskQueue(serverCfg.concurrency);
 
 // ── Router Setup ────────────────────────────────────────────
@@ -79,8 +79,8 @@ router.post("/v1/embeddings", async (_req, res, body) => {
       const chunk = texts.slice(offset, offset + maxBatch);
       logDebug(`embeddings chunk: offset=${offset}, size=${chunk.length}`);
       const results = chunk.length === 1
-        ? [await embedClient.embed(chunk[0]!)]
-        : await embedClient.embed(chunk);
+        ? [await embedClient.embed(chunk[0]!, model)]
+        : await embedClient.embed(chunk, model);
 
       for (let i = 0; i < results.length; i++) {
         allData.push({
@@ -144,7 +144,7 @@ router.post("/v1/rerank", async (_req, res, body) => {
       content: text,
     }));
 
-    const backendResults = await rerankClient.rerank(b.query, backendDocs, topN);
+    const backendResults = await rerankClient.rerank(b.query, backendDocs, topN, model);
 
     const results: RerankAPIResult[] = backendResults.map((r) => {
       const idx = typeof r.doc_id === "number" ? r.doc_id : parseInt(String(r.doc_id), 10);
@@ -185,8 +185,14 @@ function normalizeInput(input: string | string[]): string[] {
   return input;
 }
 
-function normalizeDocuments(docs: string[] | Array<{ text: string }>): string[] {
-  return docs.map((d) => (typeof d === "string" ? d : d.text));
+function normalizeDocuments(docs: string[] | Array<Record<string, unknown>>): string[] {
+  return docs.map((d) => {
+    if (typeof d === "string") return d;
+    // 支援 {text: "..."} 和 {content: "..."} 兩種格式
+    const val = d.text ?? d.content ?? d.page_content;
+    if (typeof val === "string") return val;
+    return String(val ?? "");
+  });
 }
 
 // ── Start Server ────────────────────────────────────────────

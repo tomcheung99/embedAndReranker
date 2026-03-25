@@ -39,8 +39,8 @@ export function loadServerConfig(): ServerConfig {
     maxRetries: intEnv("MAX_RETRIES", 2),
     maxBatchSize: intEnv("MAX_BATCH_SIZE", 64),
     maxDocuments: intEnv("MAX_DOCUMENTS", 1024),
-    defaultEmbedModel: strEnv("DEFAULT_EMBED_MODEL", "bge-m3"),
-    defaultRerankModel: strEnv("DEFAULT_RERANK_MODEL", "bge-reranker-v2-m3"),
+    defaultEmbedModel: strEnv("DEFAULT_EMBED_MODEL", "BAAI/bge-m3"),
+    defaultRerankModel: strEnv("DEFAULT_RERANK_MODEL", "BAAI/bge-reranker-v2-m3"),
     logLevel: logLevelEnv("LOG_LEVEL", "info"),
   };
 }

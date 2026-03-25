@@ -9,7 +9,7 @@ import type { EmbedResult } from "../types.js";
 /** Infinity / OpenAI embeddings request */
 interface InfinityEmbedRequest {
   input: string | string[];
-  model?: string;
+  model: string;
 }
 
 /** Infinity / OpenAI embeddings response */
@@ -23,20 +23,23 @@ export class EmbedClient {
   private readonly http: HttpClient;
   private readonly url: string;
 
-  constructor(config: ClientConfig) {
+  private readonly defaultModel: string;
+
+  constructor(config: ClientConfig, defaultModel = "BAAI/bge-m3") {
     this.http = new HttpClient(config);
     this.url = `${config.endpoints.embed.replace(/\/+$/, "")}/embeddings`;
+    this.defaultModel = defaultModel;
   }
 
   /**
    * 取得 dense 向量。
    * 傳入單筆字串時回傳單筆結果；傳入陣列時回傳陣列。
    */
-  async embed(text: string): Promise<EmbedResult>;
-  async embed(texts: string[]): Promise<EmbedResult[]>;
-  async embed(input: string | string[]): Promise<EmbedResult | EmbedResult[]> {
+  async embed(text: string, model?: string): Promise<EmbedResult>;
+  async embed(texts: string[], model?: string): Promise<EmbedResult[]>;
+  async embed(input: string | string[], model?: string): Promise<EmbedResult | EmbedResult[]> {
     const isSingle = typeof input === "string";
-    const payload: InfinityEmbedRequest = { input };
+    const payload: InfinityEmbedRequest = { input, model: model ?? this.defaultModel };
 
     const res = await this.http.post<InfinityEmbedRequest, InfinityEmbedResponse>(
       this.url,
@@ -56,8 +59,8 @@ export class EmbedClient {
   }
 
   /** 僅取得 dense 向量（節省傳輸量） */
-  async embedDenseOnly(text: string): Promise<number[]> {
-    const payload: InfinityEmbedRequest = { input: text };
+  async embedDenseOnly(text: string, model?: string): Promise<number[]> {
+    const payload: InfinityEmbedRequest = { input: text, model: model ?? this.defaultModel };
 
     const res = await this.http.post<InfinityEmbedRequest, InfinityEmbedResponse>(
       this.url,
