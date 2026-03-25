@@ -1,15 +1,33 @@
 // ============================================================
-// /v1/rerank Client — Cross-Encoder 精排
+// Rerank Client — Infinity / Jina-compatible Reranking
 // ============================================================
 
 import { HttpClient } from "./base.js";
 import type { ClientConfig } from "../config.js";
 import type {
-  RerankBackendRequest,
-  RerankBackendResponse,
   RerankBackendDocument,
   RerankBackendResult,
 } from "../types.js";
+
+/** Infinity / Jina rerank request */
+interface InfinityRerankRequest {
+  query: string;
+  documents: string[];
+  model?: string;
+  top_n?: number;
+}
+
+/** Infinity / Jina rerank result */
+interface InfinityRerankResult {
+  index: number;
+  relevance_score: number;
+  document?: { text: string };
+}
+
+/** Infinity / Jina rerank response */
+interface InfinityRerankResponse {
+  results: InfinityRerankResult[];
+}
 
 export class RerankClient {
   private readonly http: HttpClient;
@@ -17,7 +35,7 @@ export class RerankClient {
 
   constructor(config: ClientConfig) {
     this.http = new HttpClient(config);
-    this.url = `${config.endpoints.rerank.replace(/\/+$/, "")}/v1/rerank`;
+    this.url = `${config.endpoints.rerank.replace(/\/+$/, "")}/rerank`;
   }
 
   async rerank(
@@ -25,17 +43,21 @@ export class RerankClient {
     documents: RerankBackendDocument[],
     topK?: number,
   ): Promise<RerankBackendResult[]> {
-    const payload: RerankBackendRequest = {
+    const payload: InfinityRerankRequest = {
       query,
-      documents,
-      ...(topK !== undefined && { top_k: topK }),
+      documents: documents.map((d) => d.content),
+      ...(topK !== undefined && { top_n: topK }),
     };
 
-    const res = await this.http.post<RerankBackendRequest, RerankBackendResponse>(
+    const res = await this.http.post<InfinityRerankRequest, InfinityRerankResponse>(
       this.url,
       payload,
     );
 
-    return res.results;
+    return res.results.map((r) => ({
+      doc_id: r.index,
+      content: r.document?.text ?? documents[r.index]?.content ?? "",
+      score: r.relevance_score,
+    }));
   }
 }

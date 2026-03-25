@@ -7,8 +7,8 @@ services:
       - "${PORT:-3999}:3000"
     environment:
       # ── 服務端點 ─────────────────────────────────────────
-      EMBED_URL: "${EMBED_URL:-http://bge-m3:8000}"
-      RERANK_URL: "${RERANK_URL:-http://bge-reranker:8002}"
+      EMBED_URL: "${EMBED_URL:-http://infinity:8000}"
+      RERANK_URL: "${RERANK_URL:-http://infinity:8000}"
       # ── 佇列與效能 ──────────────────────────────────────
       CONCURRENCY: "${CONCURRENCY:-2}"
       TIMEOUT_MS: "${TIMEOUT_MS:-30000}"
