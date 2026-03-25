@@ -14,8 +14,8 @@ services:
       TIMEOUT_MS: "${TIMEOUT_MS:-30000}"
       MAX_RETRIES: "${MAX_RETRIES:-2}"
       # ── RAM 管理 ────────────────────────────────────────
-      MAX_BATCH_SIZE: "${MAX_BATCH_SIZE:-64}"
-      MAX_DOCUMENTS: "${MAX_DOCUMENTS:-1024}"
+      MAX_BATCH_SIZE: "${MAX_BATCH_SIZE:-8}"
+      MAX_DOCUMENTS: "${MAX_DOCUMENTS:-512}"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
       interval: 30s
